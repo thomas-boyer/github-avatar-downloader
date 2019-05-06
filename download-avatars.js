@@ -42,7 +42,7 @@ function downloadImageByURL(url, dir, filePath)
     .pipe(fs.createWriteStream(`${dir}/${filePath}`));
 }
 
-getRepoContributors("jquery", "jquery", function(err, result) {
+getRepoContributors(args[0], args[1], function(err, result) {
   const resultObj = JSON.parse(result);
   if (err)
   {
