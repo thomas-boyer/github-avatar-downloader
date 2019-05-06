@@ -3,10 +3,9 @@ let fs = require('fs');
 let secrets = require('./secrets.js');
 let args = process.argv.slice(2);
 
-console.log('Welcome to the GitHub Avatar Downloader!');
-
 function getRepoContributors(repo, callback)
 {
+  //URL and headers for API request
   let options =
   {
     url: "https://api.github.com/repos/" + repo[0] + "/" + repo[1] + "/contributors",
@@ -17,6 +16,7 @@ function getRepoContributors(repo, callback)
     }
   };
 
+  //Perform callback function on response
   request(options, function(err, result, body)
   {
     callback(err, body);
@@ -25,11 +25,13 @@ function getRepoContributors(repo, callback)
 
 function downloadImageByURL(url, dir, filePath)
 {
+  //If the target directory doesn't exist, create it
   if (!fs.existsSync(dir))
   {
     fs.mkdirSync(dir);
   }
 
+  //Make GET request
   request.get(url)
     .on('error', function(err)
       {
@@ -39,26 +41,38 @@ function downloadImageByURL(url, dir, filePath)
       {
         console.log(`Avatar download complete`)
       })
+    //Write each image to file using given directory and filepath
     .pipe(fs.createWriteStream(`${dir}/${filePath}`));
 }
 
+//////////Program start//////////
+
+console.log('Welcome to the GitHub Avatar Downloader!');
+
+//If there are more or fewer than 2 arguments, ask for two arguments
 if (args.length !== 2)
 {
   console.log("Please provide the repository owner and name as arguments as such:");
   console.log("<repoOwner> <repoName>");
 }
+//Otherwise, call getRepoContributors with callback
 else
 {
   getRepoContributors(args, function(err, result) {
 
     const resultObj = JSON.parse(result);
+    //If there is no error
+    //for each avatar, feed the avatar URL, target directory, and username to downloadImageByURL function
     if (err)
     {
       console.log("Errors:", err);
     }
-    for (let obj of resultObj)
+    else
     {
-      downloadImageByURL(obj.avatar_url, './avatars', obj.login);
+      for (let obj of resultObj)
+      {
+        downloadImageByURL(obj.avatar_url, './avatars', obj.login);
+      }
     }
   });
 }
