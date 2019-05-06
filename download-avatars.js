@@ -23,11 +23,11 @@ function getRepoContributors(repoOwner, repoName, callback)
   });
 }
 
-function downloadImageByURL(url, filePath)
+function downloadImageByURL(url, dir, filePath)
 {
-  if (!fs.existsSync('./avatars'))
+  if (!fs.existsSync(dir))
   {
-    fs.mkdirSync('./avatars');
+    fs.mkdirSync(dir);
   }
 
   request.get(url)
@@ -39,16 +39,17 @@ function downloadImageByURL(url, filePath)
       {
         console.log(`Avatar download complete`)
       })
-    .pipe(fs.createWriteStream(filePath));
+    .pipe(fs.createWriteStream(`${dir}/${filePath}`));
 }
 
-downloadImageByURL('https://avatars2.githubusercontent.com/u/414129?v=4', './avatars/test');
-
-// getRepoContributors("jquery", "jquery", function(err, result) {
-//   const resultObj = JSON.parse(result);
-//   console.log("Errors:", err);
-//   for (let obj of resultObj)
-//   {
-//     console.log(obj.avatar_url);
-//   }
-// });
+getRepoContributors("jquery", "jquery", function(err, result) {
+  const resultObj = JSON.parse(result);
+  if (err)
+  {
+    console.log("Errors:", err);
+  }
+  for (let obj of resultObj)
+  {
+    downloadImageByURL(obj.avatar_url, './avatars', obj.login);
+  }
+});
