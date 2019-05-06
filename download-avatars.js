@@ -5,11 +5,11 @@ let args = process.argv.slice(2);
 
 console.log('Welcome to the GitHub Avatar Downloader!');
 
-function getRepoContributors(repoOwner, repoName, callback)
+function getRepoContributors(repo, callback)
 {
   let options =
   {
-    url: "https://api.github.com/repos/" + repoOwner + "/" + repoName + "/contributors",
+    url: "https://api.github.com/repos/" + repo[0] + "/" + repo[1] + "/contributors",
     headers:
     {
       "Authorization": `token ${secrets.GITHUB_TOKEN}`,
@@ -42,14 +42,24 @@ function downloadImageByURL(url, dir, filePath)
     .pipe(fs.createWriteStream(`${dir}/${filePath}`));
 }
 
-getRepoContributors(args[0], args[1], function(err, result) {
-  const resultObj = JSON.parse(result);
-  if (err)
-  {
-    console.log("Errors:", err);
-  }
-  for (let obj of resultObj)
-  {
-    downloadImageByURL(obj.avatar_url, './avatars', obj.login);
-  }
-});
+if (args.length !== 2)
+{
+  console.log("Please provide the repository owner and name as arguments as such:");
+  console.log("<repoOwner> <repoName>");
+}
+else
+{
+  getRepoContributors(args, function(err, result) {
+
+    const resultObj = JSON.parse(result);
+    if (err)
+    {
+      console.log("Errors:", err);
+    }
+    for (let obj of resultObj)
+    {
+      downloadImageByURL(obj.avatar_url, './avatars', obj.login);
+    }
+  });
+}
+
