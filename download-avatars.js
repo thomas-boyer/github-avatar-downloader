@@ -1,5 +1,6 @@
 let request = require('request');
-let secrets = require('./secrets.js')
+let fs = require('fs');
+let secrets = require('./secrets.js');
 let args = process.argv.slice(2);
 
 console.log('Welcome to the GitHub Avatar Downloader!');
@@ -22,11 +23,32 @@ function getRepoContributors(repoOwner, repoName, callback)
   });
 }
 
-getRepoContributors("jquery", "jquery", function(err, result) {
-  const resultObj = JSON.parse(result);
-  console.log("Errors:", err);
-  for (let obj of resultObj)
+function downloadImageByURL(url, filePath)
+{
+  if (!fs.existsSync('./avatars'))
   {
-    console.log(obj.avatar_url);
+    fs.mkdirSync('./avatars');
   }
-});
+
+  request.get(url)
+    .on('error', function(err)
+      {
+        console.log(err);
+      })
+    .on('end', function(response)
+      {
+        console.log(`Avatar download complete`)
+      })
+    .pipe(fs.createWriteStream(filePath));
+}
+
+downloadImageByURL('https://avatars2.githubusercontent.com/u/414129?v=4', './avatars/test');
+
+// getRepoContributors("jquery", "jquery", function(err, result) {
+//   const resultObj = JSON.parse(result);
+//   console.log("Errors:", err);
+//   for (let obj of resultObj)
+//   {
+//     console.log(obj.avatar_url);
+//   }
+// });
